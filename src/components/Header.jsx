@@ -1,15 +1,33 @@
 import React, { useState } from "react";
-import { AppBar, Toolbar, Typography, Button, Box, IconButton, Drawer, List, ListItem, ListItemText, Modal, TextField } from "@mui/material";
+import {
+  AppBar,
+  Toolbar,
+  Typography,
+  Box,
+  IconButton,
+  Drawer,
+  List,
+  ListItem,
+  ListItemText,
+  Modal,
+  TextField,
+  Snackbar,
+  Alert,
+  Button
+} from "@mui/material";
 import MenuIcon from "@mui/icons-material/Menu";
-import { useNavigate, useLocation } from "react-router-dom"; // Import useLocation
+import { useNavigate, useLocation } from "react-router-dom";
 import emailjs from "@emailjs/browser";
 
-function Header({ onAboutClick }) {
+function Header() {
   const navigate = useNavigate();
-  const location = useLocation(); // Hook to get the current route
+  const location = useLocation();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [formData, setFormData] = useState({ user_query: "", user_email: "", user_name: "" });
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const [snackbarSeverity, setSnackbarSeverity] = useState("success");
 
   const handleModalOpen = () => {
     setModalOpen(true);
@@ -18,6 +36,10 @@ function Header({ onAboutClick }) {
 
   const handleModalClose = () => {
     setModalOpen(false);
+  };
+
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
   };
 
   const handleInputChange = (e) => {
@@ -34,13 +56,20 @@ function Header({ onAboutClick }) {
     emailjs
       .send(serviceID, templateID, formData, publicKey)
       .then(() => {
-        alert("Your query has been submitted successfully! we will Reachout as soon as Possible");
+        setSnackbarMessage("Your query has been submitted successfully! We will reach out as soon as possible.");
+        setSnackbarSeverity("success");
+        setSnackbarOpen(true);
         setFormData({ user_query: "", user_email: "", user_name: "" });
         setModalOpen(false);
+
+        // Redirect to "All Products" after successful submission
+        navigate("/all-products");
       })
       .catch((error) => {
         console.error("Error sending email:", error);
-        alert("An error occurred. Please try again later.");
+        setSnackbarMessage("An error occurred. Please try again later.");
+        setSnackbarSeverity("error");
+        setSnackbarOpen(true);
       });
   };
 
@@ -77,52 +106,34 @@ function Header({ onAboutClick }) {
           </Typography>
 
           {/* Hamburger Menu */}
-          <Box sx={{ display: { xs: "flex", sm: "none" } }}>
-            <IconButton edge="end" color="inherit" onClick={toggleDrawer(true)}>
-              <MenuIcon />
-            </IconButton>
-            <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
-              <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
-                <List>
-                  {/* Toggle Button */}
-                  <ListItem
-                    button
-                    onClick={() => {
-                      location.pathname === "/all-products"
-                        ? navigate("/")
-                        : navigate("/all-products");
-                      setDrawerOpen(false);
-                    }}
-                  >
-                    <ListItemText
-                      primary={location.pathname === "/all-products" ? "Top Products" : "All Products"}
-                    />
-                  </ListItem>
-                  <ListItem button onClick={() => navigate("/about")}>
-                    <ListItemText primary="About" />
-                  </ListItem>
-                  <ListItem button onClick={handleModalOpen}>
-                    <ListItemText primary="Have a Query?" />
-                  </ListItem>
-                </List>
-              </Box>
-            </Drawer>
-          </Box>
-
-          {/* Desktop Buttons */}
-          <Box sx={{ display: { xs: "none", sm: "flex" }, gap: 2 }}>
-            <Button
-              color="inherit"
-              onClick={() =>
-                location.pathname === "/all-products" ? navigate("/") : navigate("/all-products")
-              }
-            >
-              {location.pathname === "/all-products" ? "Top Products" : "All Products"}
-            </Button>
-            <Button color="inherit" onClick={() => navigate("/about")}>
-              About
-            </Button>
-          </Box>
+          <IconButton edge="end" color="inherit" onClick={toggleDrawer(true)}>
+            <MenuIcon />
+          </IconButton>
+          <Drawer anchor="right" open={drawerOpen} onClose={toggleDrawer(false)}>
+            <Box sx={{ width: 250 }} role="presentation" onClick={toggleDrawer(false)}>
+              <List>
+                <ListItem
+                  button
+                  onClick={() => {
+                    location.pathname === "/all-products"
+                      ? navigate("/")
+                      : navigate("/all-products");
+                    setDrawerOpen(false);
+                  }}
+                >
+                  <ListItemText
+                    primary={location.pathname === "/all-products" ? "Top Products" : "All Products"}
+                  />
+                </ListItem>
+                <ListItem button onClick={() => navigate("/about")}>
+                  <ListItemText primary="About" />
+                </ListItem>
+                <ListItem button onClick={handleModalOpen}>
+                  <ListItemText primary="Have a Query?" />
+                </ListItem>
+              </List>
+            </Box>
+          </Drawer>
         </Toolbar>
       </AppBar>
 
@@ -181,6 +192,18 @@ function Header({ onAboutClick }) {
           </form>
         </Box>
       </Modal>
+
+      {/* Snackbar Notification */}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={6000}
+        onClose={handleSnackbarClose}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        <Alert onClose={handleSnackbarClose} severity={snackbarSeverity} sx={{ width: "100%" }}>
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
     </>
   );
 }
