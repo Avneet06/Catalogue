@@ -10,19 +10,23 @@ import {
   Button,
   Modal,
   IconButton,
+  Tooltip,
 } from "@mui/material";
-import DownloadIcon from "@mui/icons-material/Download"; // Import Download Icon
+import DownloadIcon from "@mui/icons-material/Download";
 import products from "../product.js";
 
 function AllProducts() {
   const [selectedProduct, setSelectedProduct] = useState(null);
+  const [tooltipOpen, setTooltipOpen] = useState(false);
 
   const handleShowMore = (product) => {
     setSelectedProduct(product);
+    setTooltipOpen(true); // Open tooltip when modal opens
   };
 
   const handleClose = () => {
     setSelectedProduct(null);
+    setTooltipOpen(false); // Close tooltip when modal closes
   };
 
   const handleDownloadImage = (url, name) => {
@@ -77,7 +81,7 @@ function AllProducts() {
         container
         spacing={3}
         justifyContent="center"
-        sx={{ marginBottom: "50px" }} // Add space below the grid
+        sx={{ marginBottom: "50px" }}
       >
         {products.map((product) => (
           <Grid
@@ -98,7 +102,7 @@ function AllProducts() {
                 display: "flex",
                 flexDirection: "column",
                 justifyContent: "space-between",
-                height: "100%", // Maintain consistent card height
+                height: "100%",
               }}
             >
               <CardMedia
@@ -162,7 +166,7 @@ function AllProducts() {
       {/* Add space at the bottom */}
       <Box
         sx={{
-          height: "50px", // Add empty space after the grid
+          height: "50px",
         }}
       />
 
@@ -196,14 +200,23 @@ function AllProducts() {
                 }}
               />
 
-              {/* Download Icon */}
-              <IconButton
-                color="primary"
-                onClick={() => handleDownloadImage(selectedProduct.image, selectedProduct.name)}
-                sx={{ position: "absolute", top: 10, right: 10 }}
+              {/* Download Button with Tooltip */}
+              <Tooltip
+                title="Click to download image"
+                open={tooltipOpen}
+                onClose={() => setTooltipOpen(false)}
+                disableHoverListener // Prevent hover activation
               >
-                <DownloadIcon />
-              </IconButton>
+                <IconButton
+                  color="primary"
+                  onClick={() =>
+                    handleDownloadImage(selectedProduct.image, selectedProduct.name)
+                  }
+                  sx={{ position: "absolute", top: 10, right: 10 }}
+                >
+                  <DownloadIcon />
+                </IconButton>
+              </Tooltip>
 
               {/* Close Button */}
               <Button

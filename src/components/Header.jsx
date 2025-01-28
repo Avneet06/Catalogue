@@ -34,7 +34,7 @@ function Header({ onAboutClick }) {
     emailjs
       .send(serviceID, templateID, formData, publicKey)
       .then(() => {
-        alert("Your query has been submitted successfully!");
+        alert("Your query has been submitted successfully! we will Reachout as soon as Possible");
         setFormData({ user_query: "", user_email: "", user_name: "" });
         setModalOpen(false);
       })
